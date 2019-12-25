@@ -49,11 +49,11 @@ php artisan vendor:publish --provider='robrogers3\laracastle\LaracastleServicePr
 ```
 Next add this line to your main layouts blade file (e.g. app.blade.php) in the head section:
 
-''''
+```
     @include('vendor/robrogers3/headscript/laracastle')
 
-''''
-If you don't know your APP_ID or SECRET, then you need to sign up for [castle.io](https:/castle.io).
+```
+If you don't know your castle.io APP_ID or SECRET, then you need to sign up for [castle.io](https:/castle.io).
 
 Last, update update your .env files, like so:
 ```
