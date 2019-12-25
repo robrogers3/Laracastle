@@ -11,12 +11,17 @@ class Laracastle
 {
     public $castler;
 
+    /**
+     * allow us to override castle class, good for testing since we cannot easily mock static function calls
+     * @param $castler
+     */
     public function __construct($castler = null)
     {
         if ($castler == null) {
             $this->castler = \Castle::class;
         }
     }
+
     /**
      * @param  Login  $event
      * @return void
@@ -127,7 +132,6 @@ class Laracastle
      */
     public function trackPasswordReset($event)
     {
-        Log::debug(__METHOD__, ['event' => $event]);
         try {
             \Castle::track([
                 'event' => '$password_reset.succeeded',

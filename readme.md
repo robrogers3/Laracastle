@@ -124,14 +124,14 @@ If you discover any security related issues, please email author email instead o
 
 license. Please see the [license file](license.md) for more information.
 
-[ico-version]: https://img.shields.io/packagist/v/robrogers3/laracastle.svg?style=flat-square
-[ico-downloads]: https://img.shields.io/packagist/dt/robrogers3/laracastle.svg?style=flat-square
-[ico-travis]: https://img.shields.io/travis/robrogers3/laracastle/master.svg?style=flat-square
+[ico-version]: https://img.shields.io/packagist/v/robrogers3/Laracastle.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/robrogers3/Laracastle.svg?style=flat-square
+[ico-travis]: https://img.shields.io/travis/robrogers3/Laracastle/master.svg?style=flat-square
 [ico-styleci]: https://styleci.io/repos/12345678/shield
 
-[link-packagist]: https://packagist.org/packages/robrogers3/laracastle
-[link-downloads]: https://packagist.org/packages/robrogers3/laracastle
-[link-travis]: https://travis-ci.org/robrogers3/laracastle
+[link-packagist]: https://packagist.org/packages/robrogers3/Laracastle
+[link-downloads]: https://packagist.org/packages/robrogers3/Laracastle
+[link-travis]: https://travis-ci.org/robrogers3/Laracastle
 [link-styleci]: https://styleci.io/repos/12345678
 [link-author]: https://github.com/robrogers3
 [link-contributors]: ../../contributors

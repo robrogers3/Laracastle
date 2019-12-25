@@ -30,15 +30,16 @@ class LaracastleServiceProvider extends ServiceProvider
     public function register()
     {
 
-        require __DIR__ . '/../vendor/autoload.php';
-        \Castle::setApiKey(config('laracastle.castle.secret'));
         $this->mergeConfigFrom(__DIR__.'/../config/laracastle.php', 'laracastle');
+
+        \Castle::setApiKey(config('laracastle.castle.secret'));
+
         $this->app->register(LaracastleEventServiceProvider::class);
-        // Register the service the package provides.
+
+        // Register the service the Laracastle provides.
         $this->app->bind('Laracastle', function ($app) {
                 return new Laracastle;
         });
-
     }
 
     /**

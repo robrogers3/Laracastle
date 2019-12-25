@@ -8,7 +8,9 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\PasswordReset;
 
-
+/**
+ * Register the events we need to listen to for \Castle::authenticate and \Castle::track
+ */
 class LaracastleEventServiceProvider extends ServiceProvider
 {
     protected $listen = [
