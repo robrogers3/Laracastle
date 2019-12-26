@@ -3,7 +3,6 @@
 namespace robrogers3\Laracastle;
 
 use Illuminate\Support\ServiceProvider;
-
 class LaracastleServiceProvider extends ServiceProvider
 {
     /**
@@ -37,8 +36,8 @@ class LaracastleServiceProvider extends ServiceProvider
         $this->app->register(LaracastleEventServiceProvider::class);
 
         // Register the service the Laracastle provides.
-        $this->app->bind('Laracastle', function ($app) {
-                return new Laracastle;
+        $this->app->singleton('Laracastle', function ($app) {
+            return new \robrogers3\Laracastle\Laracastle;
         });
     }
 
@@ -49,7 +48,7 @@ class LaracastleServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['laracastle'];
+        return ['Laracastle'];
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace robrogers3\Laracastle\Listeners;
 
-use robrogers3\laracastle\Laracastle;
+use robrogers3\Laracastle\Laracastle;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
