@@ -5,8 +5,15 @@ php:
   - 7.3
 
 before_script:
+  - cp .env.travis .env
   - composer self-update
   - composer install --prefer-source --no-interaction --dev
   - composer dump-autoload
+  - php artisan key:generate
+
+cache:
+  directories:
+    - node_modules
+    - vendor
 
 script: phpunit
