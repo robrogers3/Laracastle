@@ -14,12 +14,12 @@ use Illuminate\Validation\ValidationException;
 class Laracastle
 {
     /** @var \Castle|TestCastle
-    public $castler;
+      public $castler;
 
-    /**
-     * allow us to override castle class, good for testing since we cannot easily mock static function calls
-     * @param $castler
-     */
+      /**
+      * allow us to override castle class, good for testing since we cannot easily mock static function calls
+      * @param $castler
+      */
     public function __construct($castler = null)
     {
 
@@ -116,7 +116,7 @@ class Laracastle
                 ]
             ]);
         } catch (\Exception $e) {
-            Log::warn(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
+            Log::warning(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
         }
     }
 
@@ -132,7 +132,7 @@ class Laracastle
                 'user_id' => $event->user->id
             ]);
         } catch (\Exception $e) {
-            Log::warn(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
+            Log::warning(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
         }
     }
 
@@ -148,7 +148,35 @@ class Laracastle
                 'user_id' => $event->user->id
             ]);
         } catch (\Exception $e) {
-            Log::warn(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
+            Log::warning(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
         }
     }
+
+    public function approve($token)
+    {
+        try {
+            return  $this->castler::track([
+                'event' => '$challenge.succeeded',
+                'device_token' => $token
+            ]);
+        } catch (\Exception $e) {
+            Log::warning(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * @param string
+     */
+    public function report($token)
+    {
+        try {
+            return  $this->castler::track([
+                'event' => '$review.escalated',
+                'device_token' => $token
+            ]);
+        } catch (\Exception $e) {
+            Log::warning(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
+        }
+    }
+
 }

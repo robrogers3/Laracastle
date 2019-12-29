@@ -62,7 +62,7 @@ class WebHookController extends Controller
             Log::debug(__METHOD__, ['exception' => $e->getMessage()]);
             throw $e;
         }
-        return $hookRequest['type'];
 
+        return $hookRequest['type'];
     }
-}
+p}

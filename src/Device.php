@@ -78,4 +78,9 @@ class Device
 
         return "$this->region, $this->country";
     }
+
+    public function token()
+    {
+        return $this->token;
+    }
 }
