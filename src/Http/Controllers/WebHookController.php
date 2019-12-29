@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use robrogers3\Laracastle\Events\AccountCompromised;
+use robrogers3\Laracastle\Events\AccountNeedsReview;
 use robrogers3\Laracastle\Repositories\UserRepository;
 
 class WebHookController extends Controller
@@ -51,9 +52,13 @@ class WebHookController extends Controller
             return;
         }
 
+        if (!isset($hookRequest['data']) || !isset($hookRequest['data']['device_token'])) {
+            return;
+        }
+
         try {
             $user = (new UserRepository())->findById($hookRequest['data']['user_id']);
-            event(new AccountNeedsReview($user));
+            event(new AccountNeedsReview($user, $hookRequest['data']['device_token']));
         } catch (ModelNotFoundException $e) {
             //Cant do anything about it!
             Log::warning(__METHOD__, ['exception' => $e->getMessage()]);

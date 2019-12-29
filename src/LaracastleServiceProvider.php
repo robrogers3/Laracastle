@@ -32,7 +32,7 @@ class LaracastleServiceProvider extends ServiceProvider
                 ->middleware('auth')
                 ->name('laracastle.review-device');
 
-            Route::post('laracaste/review-device/',
+            Route::post('laracastle/review-device/',
                         '\robrogers3\Laracastle\Http\Controllers\DevicesController@store')
                 ->middleware('auth')
                 ->name('laracastle.report-device');

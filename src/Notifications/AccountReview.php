@@ -3,7 +3,7 @@
 namespace robrogers3\Laracastle\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -42,10 +42,12 @@ class AccountReview extends Notification
      */
     public function toMail($notifiable)
     {
+
+        Log::debug(__METHOD__,['user_id' => $notifiable->id, 'token' => $this->token]);
         return (new MailMessage)
         ->subject('Review Account Activity')
         ->line('We may have detected suspicious activity on your account. Please take a moment to verify whether this activity and device are valid.')
-        ->action('Review Activity', url(config('app.url').route('laracastle.review-device', ['user_id' => $notifiable->id, 'token' => $this->token], false)));
+        ->action('Review Activity', url(config('app.url').route('laracastle.review-device', [$notifiable->id, $this->token], false)));
    }
 
     /**
