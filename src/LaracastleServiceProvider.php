@@ -46,6 +46,11 @@ class LaracastleServiceProvider extends ServiceProvider
             Route::post('laracastle/compromised-webhook',
                         '\robrogers3\Laracastle\Http\Controllers\WebHookController@compromised')
                 ->name('laracastle.compromised-webhook');
+
+            Route::post('laracastle/review-webhook',
+                        '\robrogers3\Laracastle\Http\Controllers\WebHookController@review')
+                ->name('laracastle.review-webhook');
+
         });
     }
 

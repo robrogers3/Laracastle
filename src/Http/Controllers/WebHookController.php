@@ -65,4 +65,4 @@ class WebHookController extends Controller
 
         return $hookRequest['type'];
     }
-p}
+}
