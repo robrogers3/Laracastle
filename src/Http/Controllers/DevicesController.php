@@ -14,7 +14,6 @@ class DevicesController extends Controller
 {
     public function show($user_id, $token)
     {
-        dd(__METHOD__);
         if (auth()->user()->id != $user_id) {
             return abort(401);
         }
