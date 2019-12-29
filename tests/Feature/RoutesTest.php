@@ -1,6 +1,6 @@
 <?php
 
-use Mockery;
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Event;
 use Orchestra\Testbench\TestCase;
