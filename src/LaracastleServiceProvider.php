@@ -41,8 +41,8 @@ class LaracastleServiceProvider extends ServiceProvider
                           '\robrogers3\Laracastle\Http\Controllers\DevicesController@destroy')
                 ->middleware('auth')
                 ->name('laracastle.approve-device');
-
-
+        });
+        Route::group(['middleware' => 'api'], function () {
             Route::post('laracastle/compromised-webhook',
                         '\robrogers3\Laracastle\Http\Controllers\WebHookController@compromised')
                 ->name('laracastle.compromised-webhook');
@@ -50,8 +50,8 @@ class LaracastleServiceProvider extends ServiceProvider
             Route::post('laracastle/review-webhook',
                         '\robrogers3\Laracastle\Http\Controllers\WebHookController@review')
                 ->name('laracastle.review-webhook');
-
         });
+
     }
 
     /**

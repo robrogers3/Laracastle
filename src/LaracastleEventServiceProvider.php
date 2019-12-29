@@ -2,7 +2,9 @@
 
 namespace robrogers3\Laracastle;
 
+use robrogers3\Laracastle\Events\AccountNeedsReview;
 use robrogers3\Laracastle\Events\AccountCompromised;
+use robrogers3\Laracastle\Listeners\AccountNeedsReviewListener;
 use robrogers3\Laracastle\Listeners\AccountCompromisedListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Auth\Events\Failed;
@@ -30,7 +32,11 @@ class LaracastleEventServiceProvider extends ServiceProvider
         ],
         AccountCompromised::class => [
             AccountCompromisedListener::class
+        ],
+        AccountNeedsReview::class => [
+            AccountNeedsReviewListener::class
         ]
+
     ];
 
     /**

@@ -7,14 +7,19 @@ use robrogers3\Laracastle\Tests\User;
 use robrogers3\Laracastle\Laracastle;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Notifications\Notifiable;
+use robrogers3\Laracastle\Events\AccountNeedsReview;
 use robrogers3\Laracastle\Events\AccountCompromised;
-use robrogers3\Laracastle\Listeners\AccountCompromisedListeners;
+use robrogers3\Laracastle\Listeners\AccountCompromisedListener;
+use robrogers3\Laracastle\Listeners\AccountNeedsReviewListener;
+use robrogers3\Laracastle\Notifications\AccountReview;
+
 use Orchestra\Testbench\TestCase;
 
 class LaracastleEventsTest extends TestCase
@@ -122,5 +127,22 @@ class LaracastleEventsTest extends TestCase
         $user = Mockery::mock(User::class)->makePartial();
         $user->shouldReceive('resetAccountPassword')->once();
         Event::dispatch(new AccountCompromised($user));
+    }
+
+    /** @test */
+    public function it_triggers_a_review_device_notification_when_device_needs_review()
+    {
+        Notification::fake();
+        $user = Mockery::mock(User::class)->makePartial();
+        Event::dispatch(new AccountNeedsReview($user, $token="ABCD"));
+        Notification::assertSentTo(
+            [$user], AccountReview::class,
+            function($notification, $channels) use ($token) {
+                return $notification->token == $token;
+
+            }
+        );
+
+
     }
 }
