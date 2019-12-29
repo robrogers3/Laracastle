@@ -1,9 +1,5 @@
 language: php
 
-env:
- - APP_KEY=base64:JjrFWC+TGnySY2LsldPXAxuHpyjh8UuoPMt6yy2gJ8U=
- - CASTLE_SECRET=tYiqkpSVgMHSZpwSJTsBipyaS1zxMCsW
-
 php:
   - 7.2
   - 7.3
