@@ -1,21 +1,30 @@
 <?php
 
-namespace Tests\Feature;
+namespace robrogers3\Laracastle\Tests\Feature;
 
 use Mockery;
-//use App\User;
+use robrogers3\Laracastle\Tests\User;
 use robrogers3\Laracastle\Laracastle;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Notifications\Notifiable;
+use robrogers3\Laracastle\Events\AccountCompromised;
+use robrogers3\Laracastle\Listeners\AccountCompromisedListeners;
 use Orchestra\Testbench\TestCase;
 
-class CastleTest extends TestCase
+class LaracastleEventsTest extends TestCase
 {
     protected function getPackageProviders($app)
     {
         return ['robrogers3\Laracastle\LaracastleServiceProvider'];
     }
+
+    //TODO delete these non-test methods
     public function we_are_listening_for_login_events()
     {
         Event::fake();
@@ -73,7 +82,7 @@ class CastleTest extends TestCase
     }
 
     /** @test */
-    public function test_it_does_castle_stuff()
+    public function it_calls_authenticate_on_login()
     {
         $spy = $this->spy(Laracastle::class);
         $user = Mockery::mock(User::class)->makePartial();
@@ -81,8 +90,37 @@ class CastleTest extends TestCase
         $spy->shouldHaveReceived('authenticate')->once();
 
     }
-}
-class User {
+    /** @test */
+    public function it_calls_track_on_login_failure()
+    {
+        $spy = $this->spy(Laracastle::class);
+        $user = Mockery::mock(User::class)->makePartial();
+        Event::dispatch(new Failed('web', $user, false));
+        $spy->shouldHaveReceived('trackFailed')->once();
+    }
 
+    /** @test */
+    public function it_calls_track_on_logout()
+    {
+        $spy = $this->spy(Laracastle::class);
+        $user = Mockery::mock(User::class)->makePartial();
+        Event::dispatch(new Logout('web', $user, false));
+        $spy->shouldHaveReceived('trackLogout')->once();
+    }
+    /** @test */
+    public function it_calls_track_on_password_reset()
+    {
+        $spy = $this->spy(Laracastle::class);
+        $user = Mockery::mock(User::class)->makePartial();
+        Event::dispatch(new PasswordReset('web', $user, false));
+        $spy->shouldHaveReceived('trackPasswordReset')->once();
+    }
 
+    /** @test */
+    public function it_triggers_reset_accounts_on_account_compromised()
+    {
+        $user = Mockery::mock(User::class)->makePartial();
+        $user->shouldReceive('resetAccountPassword')->once();
+        Event::dispatch(new AccountCompromised($user));
+    }
 }

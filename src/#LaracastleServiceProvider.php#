@@ -4,11 +4,10 @@ namespace robrogers3\Laracastle;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use robrogers3\Laracastle\Http\Controllers\WebHookController;
-
-
+use Zttp\Zttp;
+use GuzzleHttp\Client;
 
 class LaracastleServiceProvider extends ServiceProvider
 {
@@ -28,14 +27,29 @@ class LaracastleServiceProvider extends ServiceProvider
 
 
 
-        Route::get('laracastle/review-activity/{user_id}/{device_token}',
-                    '\robrogers3\Laracastle\Http\Controllers\DevicesController@show')
-                   ->name('laracastle.review-device');
+        Route::get('laracastle/review-activity/{device_token}', function ($device_token) {
+
+            return view('robrogers3::pages.devices');
+            $encoded_secret = base64_encode(':'.config('laracastle.castle.secret'));
+            $url = config('laracastle.castle.devices_path') . $device_token;
+            //$url = config('laracastle.castle.api_base_url') . '/v1/users/1/devices';
+            // $client = new Guzzle\Http\Client();
+            // $request = $client->get('http://www.server.com/endpoint');
+            // $request->setAuth('username', 'password');
+            // $response = $request->send();
+            // return;
+            $response = Zttp::withHeaders([
+                "Authorization" => "Basic $encoded_secret"
+            ])->get($url);
+            dd(collect(collect($response->json())->get('context'))->get('location'));
+            Log::debug(__METHOD__, ['castle says' => $response]);
+            return $device_token;
+        });
 
 
-        Route::post('laracastle/compromised-webhook',
-                    '\robrogers3\Laracastle\Http\Controllers\WebHookController@compromised')
-                   ->name('laracastle.compromised-webhook');
+        Route::post('laracastle/compromised-webhook', '\robrogers3\Laracastle\Http\Controllers\WebHookController@compromised')
+            ->middleware('auth')
+            ->name('laracastle.webhook');
     }
 
     /**
@@ -75,7 +89,6 @@ class LaracastleServiceProvider extends ServiceProvider
      */
     protected function bootForConsole()
     {
-        Auth::routes();
         // Publishing the configuration file.
         $this->publishes([
             __DIR__.'/../config/laracastle.php' => config_path('laracastle.php'),

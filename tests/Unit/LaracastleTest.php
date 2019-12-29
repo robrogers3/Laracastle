@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace robrogers3\Laracastle\Tests\Unit;
 
 use Mockery;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -67,7 +67,47 @@ class LaracastleTest extends TestCase
         $this->assertNull($this->user->email_verified_at);
     }
 
+    /** @test */
+    public function it_calls_track_on_logout_event()
+    {
 
+        $castler = new TesterCastler(null);
+        $laracastle = new Laracastle($castler);
+        $tracked = $laracastle->trackLogout($this->event);
+        $this->assertSame($tracked, [
+            'event' => '$logout.succeeded',
+            'user_id' => $this->user->id
+        ]);
+    }
+
+    /** @test */
+    public function it_calls_track_on_login_failed()
+    {
+
+        $castler = new TesterCastler(null);
+        $laracastle = new Laracastle($castler);
+        $tracked = $laracastle->trackFailed($this->event);
+        $this->assertSame($tracked, [
+            'event' => '$login.failed',
+            'user_id' => $this->user->id,
+            'user_traits' => [
+                'email' => $this->user->email,
+                'registered_at' => $this->user->created_at
+            ]
+        ]);
+    }
+
+    /** @test */
+    public function it_calls_track_on_password_reset()
+    {
+        $castler = new TesterCastler(null);
+        $laracastle = new Laracastle($castler);
+        $tracked = $laracastle->trackPasswordReset($this->event);
+        $this->assertSame($tracked, [
+            'event' => '$password_reset.succeeded',
+            'user_id' => $this->user->id
+        ]);
+    }
 }
 
 /**
@@ -125,9 +165,11 @@ class Verdict
 }
 class TesterLaracastle extends Laracastle
 {
+    public $castler;
     public function __construct($verdict)
     {
         $this->castler = new TesterCastler($verdict);
+
     }
 }
 class TesterCastler
@@ -140,6 +182,11 @@ class TesterCastler
     public static function authenticate(array $args)
     {
         return self::$verdict;
+    }
+
+    public static function track(array $args)
+    {
+        return $args;
     }
 }
 class TesterEvent

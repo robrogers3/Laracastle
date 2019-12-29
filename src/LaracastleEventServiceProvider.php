@@ -2,6 +2,8 @@
 
 namespace robrogers3\Laracastle;
 
+use robrogers3\Laracastle\Events\AccountCompromised;
+use robrogers3\Laracastle\Listeners\AccountCompromisedListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
@@ -25,6 +27,9 @@ class LaracastleEventServiceProvider extends ServiceProvider
         ],
         PasswordReset::class => [
             Listeners\PasswordResetListener::class,
+        ],
+        AccountCompromised::class => [
+            AccountCompromisedListener::class
         ]
     ];
 

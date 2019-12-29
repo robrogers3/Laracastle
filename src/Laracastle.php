@@ -2,13 +2,18 @@
 
 namespace robrogers3\Laracastle;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Laracastle is the integration point betwenn Laravel and Castle.io
+ *
+ */
 class Laracastle
 {
+    /** @var \Castle|TestCastle
     public $castler;
 
     /**
@@ -17,9 +22,13 @@ class Laracastle
      */
     public function __construct($castler = null)
     {
-        if ($castler == null) {
+
+        if ($castler) {
+            $this->castler = $castler;
+        } else {
             $this->castler = \Castle::class;
         }
+
     }
 
     /**
@@ -51,7 +60,7 @@ class Laracastle
         if (!$verdict) {
             //should not get here! We shoud have a $verdict
             //catch should catch it!
-            Log::warn(__METHOD__, ['message' => 'veridict not returned from castle']);
+            Log::warning(__METHOD__, ['message' => 'veridict not returned from castle']);
             return;
         }
 
@@ -60,7 +69,7 @@ class Laracastle
         //@see laracastle config
         if (config('laracastle.castle.mode') == 'evaluation') {
             //just log verdict
-            Log::debug(__METHOD__, ['verdict' => $verdict->action]);
+            Log::warning(__METHOD__, ['verdict' => $verdict->action]);
             return;
         }
 
@@ -77,13 +86,15 @@ class Laracastle
             } else {
                 //TODO Perhaps do event which sends an email instead notifying user?
                 //TODO add recapcha to the page
+                //TODO figure out if we should do anything
                 Auth::logout();
                 throw ValidationException::withMessages([
                     'password' => [trans('auth.failed')],
                 ]);
             }
         } else if ($verdict->action == 'deny') {
-            //Laravel will pick this up after 5 attempts in throttling period and lock user out for period. 
+            //Laravel will pick this up after 5 attempts in throttling period
+            //and lock user out for period.
             //configurable.
             Auth::logout();
         }
@@ -96,16 +107,16 @@ class Laracastle
     public function trackFailed($event)
     {
         try {
-            \Castle::track([
+            return $this->castler::track([
                 'event' => '$login.failed',
-                'user_id' => $event->user->id ?: -1,
+                'user_id' => $event->user->id ?: null,
                 'user_traits' => [
                     'email' => $event->user->email ?: 'not found',
                     'registered_at' => $event->user->created_at ?: 'not found'
                 ]
             ]);
         } catch (\Exception $e) {
-            Log::debug(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
+            Log::warn(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
         }
     }
 
@@ -116,14 +127,13 @@ class Laracastle
     public function trackLogout($event)
     {
         try {
-            \Castle::track([
+            return $this->castler::track([
                 'event' => '$logout.succeeded',
                 'user_id' => $event->user->id
             ]);
         } catch (\Exception $e) {
-            Log::debug(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
+            Log::warn(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
         }
-        Log::info(__METHOD__, ['logout' => 'does this need tracking']);
     }
 
     /**
@@ -133,12 +143,12 @@ class Laracastle
     public function trackPasswordReset($event)
     {
         try {
-            \Castle::track([
+            return  $this->castler::track([
                 'event' => '$password_reset.succeeded',
                 'user_id' => $event->user->id
             ]);
         } catch (\Exception $e) {
-            Log::debug(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
+            Log::warn(__METHOD__, ['event' => $e, 'error' => $e->getMessage()]);
         }
     }
 }
