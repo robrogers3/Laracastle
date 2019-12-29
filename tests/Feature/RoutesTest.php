@@ -1,6 +1,6 @@
 <?php
 
-
+use Mockery;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Event;
 use Orchestra\Testbench\TestCase;
@@ -12,6 +12,8 @@ class RoutesTest extends TestCase
 {
     protected $user;
 
+    protected $token;
+
     /**
      * Setup the test environment.
      */
@@ -20,6 +22,7 @@ class RoutesTest extends TestCase
         parent::setUp();
 
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+        $this->token = "eyJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6InpUcEsyM1h5V1I1aVl5ZnN4OHlrSFk1WGpndHBmNXdwIiwidmVyc2lvbiI6MC4xfQ.37jCDYUpkO4Q17YNamCfyRw3uhcDzm1OvF0-xpOXqR0";
 
         $this->user = new User();
         $this->user->name = 'Rob';
@@ -43,7 +46,7 @@ class RoutesTest extends TestCase
     /** @test */
     public function it_responds_to_the_compromised_webhooks_route()
     {
-
+        $this->actingAs($this->user);
         $this->withoutExceptionHandling();
         $hookData = json_decode($this->getIncidentConfirmedWebhookJson(), true);
         Event::fake();
@@ -60,11 +63,34 @@ class RoutesTest extends TestCase
     public function it_shows_a_users_device_given_a_device_token()
     {
         $this->withoutExceptionHandling();
-        $token = "eyJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6InpUcEsyM1h5V1I1aVl5ZnN4OHlrSFk1WGpndHBmNXdwIiwidmVyc2lvbiI6MC4xfQ.37jCDYUpkO4Q17YNamCfyRw3uhcDzm1OvF0-xpOXqR0";
-        $this->get(route('laracastle.review-device', [1, $token]))
-             ->assertSee('Richmond');
+        $this->actingAs($this->user)
+             ->get(route('laracastle.review-device', ['user_id'=>1, 'device_token'=> $this->token]))
+             ->assertOk()
+             ->assertSee('Virginia Beach');
+
     }
 
+    /** @test */
+    public function it_reports_a_device()
+    {
+        $spy = $this->spy(Laracastle::class);
+        $this->withoutExceptionHandling();
+        $this->actingAs($this->user)
+             ->post(route('laracastle.report-device'), ['token' => $this->token])
+             ->assertRedirect('/home');
+        $spy->shouldHaveReceived('report')->once();
+    }
+
+    /** @test */
+    public function it_approves_a_device()
+    {
+        $spy = $this->spy(Laracastle::class);
+        $this->withoutExceptionHandling();
+        $this->actingAs($this->user)
+             ->delete(route('laracastle.approve-device'), ['token' => $this->token])
+             ->assertRedirect('/home');
+        $spy->shouldHaveReceived('approve')->once();
+    }
 
     protected function getIncidentConfirmedWebhookJson()
     {

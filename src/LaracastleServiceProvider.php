@@ -26,16 +26,27 @@ class LaracastleServiceProvider extends ServiceProvider
             $this->bootForConsole();
         }
 
+        Route::group(['middleware' => 'web'], function () {
+            Route::get('laracastle/review-device/{user_id}/{device_token}',
+                       '\robrogers3\Laracastle\Http\Controllers\DevicesController@show')
+                ->middleware('auth')
+                ->name('laracastle.review-device');
+
+            Route::post('laracaste/review-device/',
+                        '\robrogers3\Laracastle\Http\Controllers\DevicesController@store')
+                ->middleware('auth')
+                ->name('laracastle.report-device');
+
+            Route::delete('laracaste/review-device/',
+                          '\robrogers3\Laracastle\Http\Controllers\DevicesController@destroy')
+                ->middleware('auth')
+                ->name('laracastle.approve-device');
 
 
-        Route::get('laracastle/review-activity/{user_id}/{device_token}',
-                    '\robrogers3\Laracastle\Http\Controllers\DevicesController@show')
-                   ->name('laracastle.review-device');
-
-
-        Route::post('laracastle/compromised-webhook',
-                    '\robrogers3\Laracastle\Http\Controllers\WebHookController@compromised')
-                   ->name('laracastle.compromised-webhook');
+            Route::post('laracastle/compromised-webhook',
+                        '\robrogers3\Laracastle\Http\Controllers\WebHookController@compromised')
+                ->name('laracastle.compromised-webhook');
+        });
     }
 
     /**
