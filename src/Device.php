@@ -72,6 +72,10 @@ class Device
 
     public function location()
     {
+        if (!$this->country) {
+            return "Not Available";
+        }
+
         if ($this->city) {
             return "$this->city, $this->country";
         }

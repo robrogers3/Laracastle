@@ -20,6 +20,7 @@
         </whitelist>
     </filter>
     <php>
+      <server name="APP_KEY" value="base64:JjrFWC+TGnySY2LsldPXAxuHpyjh8UuoPMt6yy2gJ8U="/>
       <server name="CASTLE_APP_ID" value="636553622378256"/>
       <server name="CASTLE_MODE" value="running"/>
       <server name="APP_ENV" value="testing"/>
@@ -31,4 +32,9 @@
       <server name="QUEUE_CONNECTION" value="sync"/>
       <server name="SESSION_DRIVER" value="array"/>
     </php>
+    <logging>
+      <log type="coverage-html" target="build/report" lowUpperBound="35"
+       highLowerBound="70"/>
+      <log type="coverage-text" target="build/coverage.txt"/>
+    </logging>
 </phpunit>

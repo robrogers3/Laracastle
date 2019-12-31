@@ -52,7 +52,7 @@ php artisan migrate
 ```
 
 
-#### Initial Configuration
+### Initial Configuration
 
 After you have required the package via composer, run:
 
@@ -76,7 +76,7 @@ CASTLE_MODE=[evaluation|production]
 
 *When you are just starting out, set the CASTLE_MODE to 'evaluation'. Once you are ready to take action, change the CASTLE_MODE to 'production'.*
 
-#### (Highly) Recommended Configuration Changes
+### (Highly) Recommended Configuration Changes
 
 Use "Email Verification" to protected your routes to greatly reduce your headaches!
 
@@ -91,10 +91,26 @@ Next update your Auth routes in routes/web.php like so:
 ```
 Auth::routes(['verify' => true]);
 ```
-Then make sure you user implements 'MustVerifyEmail' like so:
+Then **make sure** you user implements 'MustVerifyEmail' and 'Laracastle\UserIntefrace'.
+
+You will also need to add these two traits to your user model:
+* ResetsAccounts, and
+* ChecksVerification
+
+Your User class will look like this:
 ```
-class User extends Authenticatable implements MustVerifyEmail
+use robrogers3\Laracastle\UserInterface;
+use robrogers3\Laracastle\Traits\ChecksVerification;
+use robrogers3\Laracastle\Traits\ResetsAccount;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable implements MustVerifyEmail, UserInterface
 {
+    use Notifiable, ResetsAccount, ChecksVerification;
+    //...
+}
     use Notifiable;
     //...
 }
@@ -107,6 +123,42 @@ Route::get('home', function () {
     // Only verified users may enter...
 })->middleware('verified'); // verified middleware is the key!
 ```
+
+Optional: Add this to your AppServiceProvider
+```
+//...
+use robrogers3\Laracastle\UserInterface;
+//...
+
+public function boot()
+{
+    $this->app->bind(UserInterface::class, function ($app) {
+            return User::class;
+    });
+}
+```
+
+### When you are ready to go live.
+
+First head over to [Web Hooks on your Castle.io Dashboard](https://dashboard.castle.io/settings/webhooks).
+
+And set two webhook end points:
+
+1. For the '$incident.confirmed' event add this endpoint:
+```
+https://your-base-url.com/laracastle/compromised-webhook
+```
+
+2. For the '$review.opened' event add this endpoint:
+```
+https://your-base-url.com/laracastle/review-webhook
+```
+
+Do NOT select **Subscribe to All Events** for either endpoint.
+
+*Note the second webhook is recommended but optional.*
+
+Congrats your done. Your users are now protected by [castle.io])(https://castle.io)
 
 ## How It (Laracastle) Works?
 
@@ -128,13 +180,11 @@ If the Login is denied, then we disallow Login, and then Laravel will take over 
 
 If Castle.io determines that an account or device may have been compromised, it sends a request to a webhook in Laracastle. Laracastle uses this information to reset the user's account password, and then notify them via email that their account may have been compromised and that they need to reset their password before they can access their account.
 
-#### When unusal or suspicious devices are access your account.
+#### When unusal or suspicious devices access your account.
 
-**TODO Not done yet**
+When castle.io believes their has been unusual or suspicious device activity accessing your account, it sends another webhook to Laracastle. Laracastle uses this information to notify the user of the activity, and ask them review it.
 
-When castle.io believes their has been unusual or suspicious device activity accessing your account, it sends another webhook to Laracastle. Laracastle uses this information to notify the user of the activity, and ask they review it.
-
-On clicking 'Review Device' from the notification, they are able to see the details of the activity. The user can either confirm it was valid actity, or report it as invalid. If it is valid, the suspicious activity is resolved, otherwise, thea ctivity is escalated. When escalated the compromised webhook will be run,  the account password will be reset, and the user will be notified via email.
+On clicking 'Review Device' from the notification, they are able to see the details of the activity. The user can either confirm it was valid actity, or report it as invalid. If it is valid, the suspicious activity is resolved, otherwise, the activity is escalated. When escalated the compromised webhook will be run, the account password will be reset, and the user will be notified via email.
 
 ## Change log
 

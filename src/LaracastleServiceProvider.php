@@ -6,6 +6,10 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use robrogers3\Laracastle\User;
+use robrogers3\Laracastle\UserInterface;
+use robrogers3\Laracastle\Repositories\DeviceRepository;
+use robrogers3\Laracastle\Repositories\DeviceRepositoryInterface;
 use robrogers3\Laracastle\Http\Controllers\WebHookController;
 
 
@@ -20,6 +24,12 @@ class LaracastleServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'robrogers3');
+        $this->app->bind(DeviceRepositoryInterface::class, function ($app) {
+            return new DeviceRepository;
+        });
+        $this->app->bind(UserInterface::class, function ($app) {
+            return User::class;
+        });
 
         // Publishing is only necessary when using the CLI.
         if ($this->app->runningInConsole()) {

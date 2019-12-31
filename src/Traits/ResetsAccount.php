@@ -5,7 +5,7 @@ namespace robrogers3\Laracastle\Traits;
 use robrogers3\Laracastle\Notifications\AccountReset;
 use Illuminate\Support\Str;
 
-trait ResetsAccounts
+trait ResetsAccount
 {
     public function resetAccountPassword()
     {
@@ -14,6 +14,4 @@ trait ResetsAccounts
         $token = app('auth.password.broker')->createToken($this);
         $this->notify(new AccountReset($token));
     }
-
 }
-

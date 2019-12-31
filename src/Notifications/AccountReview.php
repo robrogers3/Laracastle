@@ -42,8 +42,6 @@ class AccountReview extends Notification
      */
     public function toMail($notifiable)
     {
-
-        Log::debug(__METHOD__,['user_id' => $notifiable->id, 'token' => $this->token]);
         return (new MailMessage)
         ->subject('Review Account Activity')
         ->line('We may have detected suspicious activity on your account. Please take a moment to verify whether this activity and device are valid.')

@@ -16,7 +16,6 @@ class AccountNeedsReviewListener
      */
     public function __construct()
     {
-        //
     }
 
     /**

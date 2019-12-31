@@ -18,12 +18,29 @@ use robrogers3\Laracastle\Events\AccountNeedsReview;
 use robrogers3\Laracastle\Events\AccountCompromised;
 use robrogers3\Laracastle\Listeners\AccountCompromisedListener;
 use robrogers3\Laracastle\Listeners\AccountNeedsReviewListener;
+use robrogers3\Laracastle\Notifications\AccountReset;
 use robrogers3\Laracastle\Notifications\AccountReview;
 
 use Orchestra\Testbench\TestCase;
 
 class LaracastleEventsTest extends TestCase
 {
+
+        /**
+     * Setup the test environment.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+        $this->user = new User();
+        $this->user->name = 'Rob';
+        $this->user->email = 'robrogers@me.com';
+        $this->user->password = $passward = bcrypt('password');
+        $this->user->save();
+    }
+
     protected function getPackageProviders($app)
     {
         return ['robrogers3\Laracastle\LaracastleServiceProvider'];
@@ -124,9 +141,12 @@ class LaracastleEventsTest extends TestCase
     /** @test */
     public function it_triggers_reset_accounts_on_account_compromised()
     {
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->shouldReceive('resetAccountPassword')->once();
-        Event::dispatch(new AccountCompromised($user));
+        Notification::fake();
+        Event::dispatch(new AccountCompromised($this->user));
+        Notification::assertSentTo(
+            [$this->user], AccountReset::class
+        );
+
     }
 
     /** @test */

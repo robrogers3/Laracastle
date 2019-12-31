@@ -64,7 +64,7 @@ class Laracastle
             return;
         }
 
-
+        Log::warning(__METHOD__, ['verdict' => $verdict->action]);
         //if in evaluation mode, don't do anything
         //@see laracastle config
         if (config('laracastle.castle.mode') == 'evaluation') {
@@ -77,22 +77,34 @@ class Laracastle
             //we have already logged in so we are good to go
             //TODO: remove this line after dev
             Log::debug(__METHOD__, ['verdict' => $verdict->action]);
-        } else if ($verdict->action == 'challenge') {
-            // instead of showing a challenge make them ReVerifyEmail
-            // should be configurable
-            if ($event->user instanceof MustVerifyEmail && $event->user->email_verified_at) {
-                $event->user->email_verified_at = null;
-                $event->user->save();
-            } else {
+            return;
+
+        }
+
+        if ($verdict->action == 'challenge') {
+            if (! $event->user instanceof MustVerifyEmail) {
                 //TODO Perhaps do event which sends an email instead notifying user?
                 //TODO add recapcha to the page
                 //TODO figure out if we should do anything
-                Auth::logout();
-                throw ValidationException::withMessages([
-                    'password' => [trans('auth.failed')],
-                ]);
+                Log::warning(__METHOD__, ['needs challenge' => 'but we dont have one yet', 'user' => $event->user]);
+                return;
             }
-        } else if ($verdict->action == 'deny') {
+
+            // instead of showing a challenge make them ReVerifyEmail
+            // should be configurable
+            if ($event->user->recentlyVerified()) {
+                Log::debug(__METHOD__, ['message' => 'they just verified we should send Castle a notice on verification.', 'user' => $event->user]);
+                return;
+            }
+
+            //we make them verify their email as challenge
+            Log::debug(__METHOD__, ['user' => $event->user]);
+            $event->user->email_verified_at = null;
+            $event->user->save();
+            return;
+        }
+
+        if ($verdict->action == 'deny') {
             //Laravel will pick this up after 5 attempts in throttling period
             //and lock user out for period.
             //configurable.
@@ -143,7 +155,7 @@ class Laracastle
     public function trackPasswordReset($event)
     {
         try {
-            return  $this->castler::track([
+            return $this->castler::track([
                 'event' => '$password_reset.succeeded',
                 'user_id' => $event->user->id
             ]);
@@ -152,10 +164,14 @@ class Laracastle
         }
     }
 
+    /**
+     * @param string $token
+     * @retuct array
+     */
     public function approve($token)
     {
         try {
-            return  $this->castler::track([
+            return $this->castler::track([
                 'event' => '$challenge.succeeded',
                 'device_token' => $token
             ]);
@@ -165,12 +181,13 @@ class Laracastle
     }
 
     /**
-     * @param string
+     * @param string $token
+     * @return array
      */
     public function report($token)
     {
         try {
-            return  $this->castler::track([
+            return $this->castler::track([
                 'event' => '$review.escalated',
                 'device_token' => $token
             ]);

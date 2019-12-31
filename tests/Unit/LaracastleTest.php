@@ -2,9 +2,13 @@
 
 namespace robrogers3\Laracastle\Tests\Unit;
 
+use Carbon\Carbon;
 use Mockery;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use robrogers3\Laracastle\UserInterface;
 use robrogers3\Laracastle\Laracastle;
+use robrogers3\Laracastle\Traits\ChecksVerification;
+use robrogers3\Laracastle\Traits\ResetsAccount;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +25,7 @@ class LaracastleTest extends TestCase
     {
         parent::setUp();
         Config::set('laracastle.castle.mode', 'running');
-        $this->user = $user = new User(1,'robrogers@example.com', '2020-01-01', '2020-01-01');
+        $this->user = $user = new User(1,'robrogers@example.com', '2020-01-01', Carbon::now()->subDays(1));
         $this->event = $event = new TesterEvent($user, 'web');
     }
 
@@ -34,11 +38,12 @@ class LaracastleTest extends TestCase
     /**
      * @test
      */
-    public function it_does_noting_in_evaluation_mode()
+    public function it_does_nothing_in_evaluation_mode()
     {
         Config::set('laracastle.castle.mode', 'evaluation');
         $verdict = new Verdict('deny');
-        $laracastle = new TesterLaracastle($verdict);
+        $castler = new TesterCastler($verdict);
+        $laracastle = new Laracastle($castler);
         Auth::shouldReceive('logout')->never();
         $laracastle->authenticate($this->event);
     }
@@ -49,7 +54,8 @@ class LaracastleTest extends TestCase
     public function it_kills_the_login_when_the_deny_verdict_is_made()
     {
         $verdict = new Verdict('deny');
-        $laracastle = new TesterLaracastle($verdict);
+        $castler = new TesterCastler($verdict);
+        $laracastle = new Laracastle($castler);
         Auth::shouldReceive('logout')->once();
         $laracastle->authenticate($this->event);
     }
@@ -61,16 +67,28 @@ class LaracastleTest extends TestCase
     public function it_nulls_out_email_verified_at_on_challenge()
     {
         $verdict = new Verdict('challenge');
-        $laracastle = new TesterLaracastle($verdict);
+        $castler = new TesterCastler($verdict);
+        $laracastle = new Laracastle($castler);
         Auth::shouldReceive('logout')->never();
         $laracastle->authenticate($this->event);
         $this->assertNull($this->user->email_verified_at);
     }
+    /** @test */
+    public function it_does_nothing_on_challenge_if_the_user_has_recently_verified_email()
+    {
+        $user = new User(1,'robrogers@example.com', '2020-01-01', Carbon::now()->subMinutes(1));
+        $event = new TesterEvent($user, 'web');
+        $verdict = new Verdict('challenge');
+        $castler = new TesterCastler($verdict);
+        $laracastle = new Laracastle($castler);
+        Auth::shouldReceive('logout')->never();
+        $laracastle->authenticate($event);
+        $this->assertNotNull($user->email_verified_at);
 
+    }
     /** @test */
     public function it_calls_track_on_logout_event()
     {
-
         $castler = new TesterCastler(null);
         $laracastle = new Laracastle($castler);
         $tracked = $laracastle->trackLogout($this->event);
@@ -108,14 +126,39 @@ class LaracastleTest extends TestCase
             'user_id' => $this->user->id
         ]);
     }
+
+    /** @test */
+    public function it_does_nothing_on_report()
+    {
+        $castler = new TesterCastler(null);
+        $laracastle = new Laracastle($castler);
+        $tracked = $laracastle->report('some-token');
+        $this->assertSame([
+            "event" => "\$review.escalated",
+            "device_token" => "some-token"
+        ], $tracked);
+    }
+
+    /** @test */
+    public function it_does_nothing_on_approve()
+    {
+        $castler = new TesterCastler(null);
+        $laracastle = new Laracastle($castler);
+        $tracked = $laracastle->approve('some-token');
+        $this->assertSame([
+            "event" => '$challenge.succeeded',
+            "device_token" => 'some-token'
+        ], $tracked);
+    }
 }
 
 /**
- * fixtures?
  * fakes for testing
  */
-class User implements MustVerifyEmail
+class User implements MustVerifyEmail, UserInterface
 {
+    use ChecksVerification, ResetsAccount;
+
     public $id;
     public $email;
     public $created_at;
@@ -163,15 +206,7 @@ class Verdict
         $this->action = $action;
     }
 }
-class TesterLaracastle extends Laracastle
-{
-    public $castler;
-    public function __construct($verdict)
-    {
-        $this->castler = new TesterCastler($verdict);
 
-    }
-}
 class TesterCastler
 {
     public static $verdict;

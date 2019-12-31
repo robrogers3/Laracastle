@@ -5,11 +5,12 @@ namespace robrogers3\Laracastle\Tests;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
-use robrogers3\Laracastle\Traits\ResetsAccounts;
+use robrogers3\Laracastle\Traits\ChecksVerification;
+use robrogers3\Laracastle\Traits\ResetsAccount;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use Notifiable, ResetsAccounts;
+    use Notifiable, ChecksVerification, ResetsAccount;
 
 
     /**

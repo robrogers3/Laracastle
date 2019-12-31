@@ -5,7 +5,7 @@ namespace robrogers3\Laracastle\Repositories;
 use Zttp\Zttp;
 use robrogers3\Laracastle\Device;
 
-class DeviceRepository
+class DeviceRepository implements DeviceRepositoryInterface
 {
 
     /** @var string */
@@ -14,10 +14,19 @@ class DeviceRepository
     /** @var Device */
     protected $device;
 
+    public function __construct()
+    {
+        return $this;
+    }
 
-    public function __construct($token)
+    /**
+     * @param $token string
+     */
+    public function setToken($token)
     {
         $this->token = $token;
+
+        return $this;
     }
 
     public function getDevice($with = null)
@@ -25,7 +34,11 @@ class DeviceRepository
         return new Device($this->token, $this->fetchData($with));
     }
 
-    public function fetchData($with)
+    /**
+     * @param $with string
+     * @return array
+     */
+    public function fetchData($with = null)
     {
         if ($with) {
             return json_decode($with, true);
@@ -40,7 +53,7 @@ class DeviceRepository
         ])->get($url);
 
         if (!$response->isOk()) {
-            abort(404);
+            abort(404, 'device not found');
         }
 
         $data = $response->json();

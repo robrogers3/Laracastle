@@ -2,14 +2,12 @@
 
 namespace robrogers3\Laracastle\Repositories;
 
-use robrogers3\Laracastle\User;
+use robrogers3\Laracastle\UserInterface;
 
 class UserRepository
 {
     public function findById($id)
     {
-
-        $user =  User::findOrFail($id);
-        return $user;
+        return resolve(UserInterface::class)::findOrFail($id);
     }
 }

@@ -12,7 +12,7 @@ class DeviceRepositoryTest extends TestCase
     public function it_makes_a_device_from_the_repos()
     {
         $token = "19a0g9Hn84vkNSvRG6F9qM4j";
-        $repo = new DeviceRepository($token);
+        $repo = (new DeviceRepository())->setToken($token);
         $device = $repo->getDevice($this->device_data());
         $this->assertInstanceOf(Device::class, $device);
         $this->assertSame('162.12.41.13', $device->ip());
