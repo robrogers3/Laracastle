@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use robrogers3\Laracastle\User;
 use robrogers3\Laracastle\UserInterface;
+use robrogers3\Laracastle\Console\Install;
 use robrogers3\Laracastle\Repositories\DeviceRepository;
 use robrogers3\Laracastle\Repositories\DeviceRepositoryInterface;
 use robrogers3\Laracastle\Http\Controllers\WebHookController;
@@ -24,6 +25,7 @@ class LaracastleServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'robrogers3');
+
         $this->app->bind(DeviceRepositoryInterface::class, function ($app) {
             return new DeviceRepository;
         });
@@ -78,7 +80,7 @@ class LaracastleServiceProvider extends ServiceProvider
 
         $this->app->register(LaracastleEventServiceProvider::class);
 
-        // Register the service the Laracastle provides.
+        // Register the service that Laracastle provides.
         $this->app->singleton('Laracastle', function ($app) {
             return new \robrogers3\Laracastle\Laracastle;
         });
@@ -101,7 +103,9 @@ class LaracastleServiceProvider extends ServiceProvider
      */
     protected function bootForConsole()
     {
+        // Do we need this if installed. Needed for testing. Maybe
         Auth::routes();
+
         // Publishing the configuration file.
         $this->publishes([
             __DIR__.'/../config/laracastle.php' => config_path('laracastle.php'),
@@ -112,6 +116,10 @@ class LaracastleServiceProvider extends ServiceProvider
             __DIR__.'/../resources/views' => base_path('resources/views/vendor/robrogers3'),
         ], 'laracastle.views');
 
+
+        $this->commands([
+            Install::class
+        ]);;
         // Publishing assets.
         /*$this->publishes([
           __DIR__.'/../resources/assets' => public_path('vendor/robrogers3'),

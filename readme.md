@@ -8,7 +8,7 @@ Laracastle is a package that automates the installation and configuration of [ca
 
 ## What's Castle.io
 
-The short story is that [castle.io](https:/castle.io) procatively protects you users from account hacking.  When you subscribe to their service, they make intelligent decisions when users attempt to login to your site or access protected resources.
+The short story is that [castle.io](https:/castle.io) proactively protects your users from account hacking.  When you subscribe to their service, they make intelligent decisions when users attempt to login to your site or access protected resources.
 
 For more information, I recommend checking out their [site](https://castle.io).
 
@@ -59,15 +59,11 @@ After you have required the package via composer, run:
 ```
 php artisan vendor:publish --provider='robrogers3\laracastle\LaracastleServiceProvider'
 ```
-Next add this line to your main layouts blade file (e.g. app.blade.php) in the head section:
+Next, set up castle.io.
 
-```
-    @include('vendor/robrogers3/headscript/laracastle')
-
-```
 If you don't know your castle.io APP_ID or SECRET, then you need to sign up for [castle.io](https:/castle.io).
 
-Last, update update your .env files, like so:
+Then, update update your .env files, like so:
 ```
 CASTLE_SECRET=YOUR_CASTLE_SECRET
 CASTLE_APP_ID=YOUR_CASTLE_APP_ID
@@ -75,6 +71,26 @@ CASTLE_MODE=[evaluation|production]
 ```
 
 *When you are just starting out, set the CASTLE_MODE to 'evaluation'. Once you are ready to take action, change the CASTLE_MODE to 'production'.*
+
+
+### Run the Automatic Install
+
+Then run this:
+
+```
+php artisan laracastle:install
+```
+
+**NOTE: this will CLOBBER your User class and your AppServiceProvider.**
+
+### Or, Install it Manually
+
+Next add this line to your main layouts blade file (e.g. app.blade.php) in the head section:
+
+```
+    @include('vendor/robrogers3/headscript/laracastle')
+
+```
 
 ### (Highly) Recommended Configuration Changes
 
@@ -111,12 +127,9 @@ class User extends Authenticatable implements MustVerifyEmail, UserInterface
     use Notifiable, ResetsAccount, ChecksVerification;
     //...
 }
-    use Notifiable;
-    //...
-}
 ```
 
-Lastly, protect routes that should be verified by email. Like:
+Lastly, protected routes that should be verified by email. Like:
 
 ```
 Route::get('home', function () {
@@ -140,7 +153,7 @@ public function boot()
 
 ### When you are ready to go live.
 
-First head over to [Web Hooks on your Castle.io Dashboard](https://dashboard.castle.io/settings/webhooks).
+**First** head over to [Web Hooks on your Castle.io Dashboard](https://dashboard.castle.io/settings/webhooks).
 
 And set two webhook end points:
 
@@ -158,7 +171,16 @@ Do NOT select **Subscribe to All Events** for either endpoint.
 
 *Note the second webhook is recommended but optional.*
 
-Congrats your done. Your users are now protected by [castle.io])(https://castle.io)
+**Next**, if you're feeling ambitious, style the review device page.
+
+<img src="review-device.png" alt="review device" width="400px"/>
+
+Style up the device.blade.php view. You can find it in:
+```
+./resources/views/vendor/robrogers3/pages/device.blade.php
+```
+
+Congrats your done. Your users are now protected by [castle.io](https://castle.io)
 
 ## How It (Laracastle) Works?
 
