@@ -97,10 +97,8 @@ class Laracastle
                 return;
             }
 
+            $event->user->resetsEmailVerification();
             //we make them verify their email as challenge
-            Log::debug(__METHOD__, ['user' => $event->user]);
-            $event->user->email_verified_at = null;
-            $event->user->save();
             return;
         }
 
@@ -121,10 +119,10 @@ class Laracastle
         try {
             return $this->castler::track([
                 'event' => '$login.failed',
-                'user_id' => $event->user->id ?: null,
+                'user_id' => $event->user->id ?? null,
                 'user_traits' => [
-                    'email' => $event->user->email ?: 'not found',
-                    'registered_at' => $event->user->created_at ?: 'not found'
+                    'email' => $event->user->email ?? 'not found',
+                    'registered_at' => $event->user->created_at ?? 'not found'
                 ]
             ]);
         } catch (\Exception $e) {

@@ -14,4 +14,5 @@ trait ChecksVerification
 
         return $this->email_verified_at->gt(Carbon::now()->subMinutes(5));
     }
+
 }
