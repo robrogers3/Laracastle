@@ -64,7 +64,6 @@ class Laracastle
             return;
         }
 
-        Log::warning(__METHOD__, ['verdict' => $verdict->action]);
         //if in evaluation mode, don't do anything
         //@see laracastle config
         if (config('laracastle.castle.mode') == 'evaluation') {

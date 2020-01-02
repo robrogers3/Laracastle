@@ -180,7 +180,7 @@ Style up the device.blade.php view. You can find it in:
 ./resources/views/vendor/robrogers3/pages/device.blade.php
 ```
 
-Congrats your done. Your users are now protected by [castle.io](https://castle.io)
+Congrats you’re done. Your users are now protected by [castle.io](https://castle.io)
 
 ## How It (Laracastle) Works?
 
@@ -192,7 +192,7 @@ When the Login Event is fired, Lacastle makes a realtime request to [castle.io](
 
 If the Login is allowed, then Laracastle proceeds as per usual.
 
-If the Login is challenged, then we either ask the user reconfrim their email address, or ask them to login again. (See [config](#Configuration) )
+If the Login is challenged, then we either ask the user to confirm their email address, or request that they login again. (See [config](#Configuration) )
 
 If the Login is denied, then we disallow Login, and then Laravel will take over to lock the account for a specified duration. [Learn more about throttling requests](https://laravel.com/docs/6.x/authentication#login-throttling) on Laravel.com.
 
@@ -204,9 +204,9 @@ If Castle.io determines that an account or device may have been compromised, it 
 
 #### When unusal or suspicious devices access your account.
 
-When castle.io believes their has been unusual or suspicious device activity accessing your account, it sends another webhook to Laracastle. Laracastle uses this information to notify the user of the activity, and ask them review it.
+When castle.io believes there has been unusual or suspicious device activity accessing your account, it sends another webhook to Laracastle. Laracastle uses this information to notify the user of the activity, and ask them review it.
 
-On clicking 'Review Device' from the notification, they are able to see the details of the activity. The user can either confirm it was valid actity, or report it as invalid. If it is valid, the suspicious activity is resolved, otherwise, the activity is escalated. When escalated the compromised webhook will be run, the account password will be reset, and the user will be notified via email.
+On clicking 'Review Device' from the notification, they are able to see the details of the activity. The user can either confirm it was valid activity, or report it as invalid. If it is valid, the suspicious activity is resolved, otherwise, the activity is escalated. When escalated the compromised webhook will be run, the account password will be reset, and the user will be notified via email.
 
 ## Change log
 
