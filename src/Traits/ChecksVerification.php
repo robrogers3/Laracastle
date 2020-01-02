@@ -12,7 +12,7 @@ trait ChecksVerification
             return false;
         }
 
-        return $this->email_verified_at->gt(Carbon::now()->subMinutes(5));
+        return $this->email_verified_at->gt(Carbon::now()->subMinutes(config('laracastle.options.verified_ok_minutes')));
     }
 
 }

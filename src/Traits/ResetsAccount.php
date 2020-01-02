@@ -3,7 +3,6 @@
 namespace robrogers3\Laracastle\Traits;
 
 use robrogers3\Laracastle\Notifications\AccountReset;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 trait ResetsAccount

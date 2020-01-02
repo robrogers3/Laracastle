@@ -39,10 +39,10 @@ class DevicesController extends Controller
             'token' => 'required'
         ]);
 
-        session()->flash('status', 'Device Reported.');
-
         //Event it??
         Laracastle::report($validatedData['token']);
+
+        session()->flash('status', 'Device Reported');
 
         return redirect('/home');
     }
@@ -59,7 +59,7 @@ class DevicesController extends Controller
         //Event it??
         Laracastle::approve($validatedData['token']);
 
-        session()->put('status', 'Device Approved');
+        session()->flash('status', 'Device Approved');
 
         return redirect('/home');
     }
