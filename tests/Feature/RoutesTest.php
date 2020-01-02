@@ -89,7 +89,7 @@ class RoutesTest extends TestCase
              ->get(route('laracastle.review-device', [1, $this->token]))
              ->assertOk()
              ->assertSee($this->token)
-             ->assertSee('Richmond');
+             ->assertSee('San Francisco');
     }
 
     /** @test */

@@ -4,6 +4,9 @@ namespace robrogers3\Laracastle\Tests\Unit;
 
 use Carbon\Carbon;
 use Mockery;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use robrogers3\Laracastle\UserInterface;
 use robrogers3\Laracastle\Laracastle;
@@ -13,8 +16,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Auth;
 use Orchestra\Testbench\TestCase;
-use Illuminate\Auth\Events\Login;
-use Illuminate\Http\Request;
+
 
 class LaracastleTest extends TestCase
 {
@@ -69,9 +71,12 @@ class LaracastleTest extends TestCase
         $verdict = new Verdict('challenge');
         $castler = new TesterCastler($verdict);
         $laracastle = new Laracastle($castler);
+        $user = new User(1,'robrogers@example.com', '2020-01-01', Carbon::now()->subDays(1));
+        $event = new TesterEvent($user, 'web');
         Auth::shouldReceive('logout')->never();
-        $laracastle->authenticate($this->event);
-        $this->assertNull($this->user->email_verified_at);
+        $laracastle->authenticate($event);
+        $this->assertNull($user->email_verified_at);
+
     }
     /** @test */
     public function it_does_nothing_on_challenge_if_the_user_has_recently_verified_email()
@@ -189,7 +194,8 @@ class User implements MustVerifyEmail, UserInterface
      *
      * @return void
      */
-    public function sendEmailVerificationNotification() {}
+    public function sendEmailVerificationNotification() {
+    }
 
     /**
      * Get the email address that should be used for verification.
@@ -197,6 +203,11 @@ class User implements MustVerifyEmail, UserInterface
      * @return string
      */
     public function getEmailForVerification() {}
+
+    public function getKey()
+    {
+        return 'id';
+    }
 }
 class Verdict
 {
