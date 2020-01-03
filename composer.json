@@ -1,6 +1,6 @@
 {
     "name": "robrogers3/laracastle",
-    "description": ":description",
+    "description": "A Castle.io integration package for Laravel",
     "license": "MIT",
     "authors": [
         {
