@@ -204,6 +204,9 @@ If the Login is denied, then we disallow Login, and then Laravel will take over 
 
 If Castle.io determines that an account or device may have been compromised, it sends a request to a webhook in Laracastle. Laracastle uses this information to reset the user's account password, and then notify them via email that their account may have been compromised and that they need to reset their password before they can access their account.
 
+<img src="account-reset-notification.png" alt="review device" width="400px"/>
+
+
 #### When unusual or suspicious devices access your account.
 
 When castle.io believes there has been unusual or suspicious device activity accessing your account, it sends another webhook to Laracastle. Laracastle uses this information to notify the user of the activity, and ask them review it.

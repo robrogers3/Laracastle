@@ -42,7 +42,6 @@ class Device
 
         $this->ip = $data->get('ip', 'unknown');
 
-
         $this->location = collect($data->get('location', []));
 
         $this->city = $this->location->get('city');

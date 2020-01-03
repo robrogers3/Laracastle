@@ -5,7 +5,6 @@ namespace robrogers3\Laracastle;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Validation\ValidationException;
 
 /**
  * Laracastle is the integration point betwenn Laravel and Castle.io
@@ -13,16 +12,15 @@ use Illuminate\Validation\ValidationException;
  */
 class Laracastle
 {
-    /** @var \Castle|TestCastle
-      public $castler;
+    /** @var \Castle|TestCastle */
+    public $castler;
 
-      /**
-      * allow us to override castle class, good for testing since we cannot easily mock static function calls
-      * @param $castler
-      */
+    /**
+     * allow us to override castle class, good for testing since we cannot easily mock static function calls
+     * @param $castler
+     */
     public function __construct($castler = null)
     {
-
         if ($castler) {
             $this->castler = $castler;
         } else {

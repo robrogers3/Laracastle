@@ -2,11 +2,11 @@
 
 namespace robrogers3\Laracastle\Http\Controllers;
 
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Foundation\Auth\User;
-use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use robrogers3\Laracastle\Events\AccountCompromised;
 use robrogers3\Laracastle\Events\AccountNeedsReview;
 use robrogers3\Laracastle\Repositories\UserRepository;
@@ -19,7 +19,14 @@ class WebHookController extends Controller
      */
     public function compromised(Request $request)
     {
+        if (!$this->verifyWebhook($request)) {
+            throw ValidationException::withMessages([
+                'request' => ['castle signature not valid']
+            ]);
+        }
+
         $hookRequest = json_decode($request->getContent(), true);
+
         try {
             if (!isset($hookRequest['type'])
                 || $hookRequest['type'] !== '$incident.confirmed') {
@@ -50,6 +57,12 @@ class WebHookController extends Controller
      */
     public function review(Request $request)
     {
+        if (!$this->verifyWebhook($request)) {
+            throw ValidationException::withMessages([
+                'request' => ['castle signature not valid']
+                ]);
+        }
+
         $hookRequest = json_decode($request->getContent(), true);
 
         try {
@@ -81,4 +94,21 @@ class WebHookController extends Controller
 
         return $hookRequest['type'];
     }
+
+    /**
+     * @param Request $request
+     */
+    protected function verifyWebhook($request)
+	{
+        if (app('env') === 'testing') {
+            return true;
+        }
+
+        $calculated_hmac = base64_encode(hash_hmac('sha256',
+                                                   file_get_contents('php://input'),
+                                                   config('laracastle.castle.secret'),
+                                                   true));
+
+        return hash_equals($request->header('x-castle-signature'), $calculated_hmac);
+	}
 }

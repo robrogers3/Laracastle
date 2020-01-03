@@ -5,7 +5,6 @@ namespace robrogers3\Laracastle;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use robrogers3\Laracastle\User;
 use robrogers3\Laracastle\UserInterface;
 use robrogers3\Laracastle\Console\Install;
