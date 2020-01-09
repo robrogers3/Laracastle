@@ -8,15 +8,15 @@ Laracastle is a package that automates the installation and configuration of [ca
 
 ## What's Castle.io
 
-The [castle.io](https:/castle.io) proactively protects your users from account hacking.  When you subscribe to their service, they make intelligent decisions when users attempt to login to your site or access protected resources.
+[Castle.io](https:/castle.io) proactively protects your users from account hacking.  When you subscribe to their service, they make intelligent decisions when users attempt to login to your site or access protected resources.
 
 For more information, I recommend checking out their [site](https://castle.io).
 
 ## Why Laracastle?
 
-[Castle.io](https:/castle.io) is not terribly difficult to integrate, but it does take some work. 
+[Castle.io](https:/castle.io) is not difficult to integrate, but it does take some work. 
 
-With this package,  you can integrate [castle.io](https:/castle.io) services within minutes instead of hours or even days.
+With this package, you can integrate [castle.io's](https:/castle.io) services within minutes instead of hours or even days.
 
 ## Installation
 
@@ -46,7 +46,7 @@ php artisan ui vue --auth
 php artisan ui react --auth
 ```
 
-And, then of course run:
+And, then of course run this:
 ```
 php artisan migrate
 ```
@@ -76,7 +76,7 @@ CASTLE_MODE=[evaluation|production]
 
 ### Run the Automatic Install
 
-To have Castle.io integrated in minutes just run this:
+To have Castle.io integrated in minutes just run this command:
 
 **NOTE: this will CLOBBER your User class and your AppServiceProvider.**
 ```
@@ -96,18 +96,16 @@ Add this line to your main layouts blade file (e.g. app.blade.php) in the head s
 
 Use "Email Verification" to protected your routes to greatly reduce your headaches!
 
-**NOTE default action on challenge is not good, as it will still return challenge, I think**
-
 By default, if [castle.io](https://castle.io) challenges a login attempt then Laracastle will ask your user to login again, which can be a pain. A better alternative is to ensure users have verified their email address via the MustVerifyEmail interface.
 
- To start, first learn about [Laravel's Email Verification](https://laravel.com/docs/master/verification).
+To start, first learn about [Laravel's Email Verification](https://laravel.com/docs/master/verification).
 
 Next update your Auth routes in routes/web.php like so:
 
 ```
 Auth::routes(['verify' => true]);
 ```
-Then **make sure** you user implements 'MustVerifyEmail' and 'Laracastle\UserIntefrace'.
+Then **make sure** you user implements 'MustVerifyEmail' and 'Laracastle\UserInterface'.
 
 You will also need to add these two traits to your user model:
 * ResetsAccounts, and
@@ -129,7 +127,7 @@ class User extends Authenticatable implements MustVerifyEmail, UserInterface
 }
 ```
 
-Lastly, protected routes that should be verified by email. Like:
+Lastly, protected routes that should be verified by email. Like so:
 
 ```
 Route::get('home', function () {
@@ -182,7 +180,7 @@ You can find it in:
 ./resources/views/vendor/robrogers3/pages/device.blade.php
 ```
 
-Congrats you’re done. Your users are now protected by [castle.io](https://castle.io)
+Congrats you’re done. Your users are now protected by [castle.io](https://castle.io).
 
 ## How It (Laracastle) Works?
 
@@ -190,7 +188,7 @@ Congrats you’re done. Your users are now protected by [castle.io](https://cast
 
 Laracastle hooks into several events dispatched by Laravel related to the user authentication processes. Like: Logging In, Logging Out, and Resetting Passwords. Most important is the Login Event. 
 
-When the Login Event is fired, Lacastle makes a realtime request to [castle.io](https:/castle.io) to determine if the request looks 'suspicious' or 'authentic'. And depending on the level of suspiciousness, it can either Allow the login, Challenge the login, or Deny the Login.
+When the Login Event is fired, Laracastle makes a realtime request to [castle.io](https:/castle.io) to determine if the request looks 'suspicious' or 'authentic'. And depending on the level of suspiciousness, it can either Allow the login, Challenge the login, or Deny the Login.
 
 If the Login is allowed, then Laracastle proceeds as per usual.
 
@@ -202,14 +200,14 @@ If the Login is denied, then we disallow Login, and then Laravel will take over 
 
 #### When your account may have been compromised.
 
-If Castle.io determines that an account or device may have been compromised, it sends a request to a webhook in Laracastle. Laracastle uses this information to reset the user's account password, and then notify them via email that their account may have been compromised and that they need to reset their password before they can access their account.
+If Castle.io determines that an account may have been compromised, it sends a request to a webhook in Laracastle. Laracastle uses this information to reset the user's account password, and then notify them via email that their account may have been compromised and that they need to reset their password before they can access protected resources.
 
 <img src="account-reset-notification.png" alt="account reset notification" width="400px"/>
 
 
 #### When unusual or suspicious devices access your account.
 
-When castle.io believes there has been unusual or suspicious device activity accessing your account, it sends another webhook to Laracastle. Laracastle uses this information to notify the user of the activity, and ask them review it.
+When castle.io believes there has been unusual or suspicious device activity accessing your account, it sends another webhook to Laracastle. Laracastle uses this information to notify the user of the activity, and asks them review it.
 
 <img src="review-device-notification.png" alt="review device notification" width="400px">
 
