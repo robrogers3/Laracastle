@@ -40,7 +40,6 @@ class WebHookController extends Controller
             $user = (new UserRepository())->findById($hookRequest['data']['user_id']);
 
             event(new AccountCompromised($user));
-
         } catch (ModelNotFoundException $e) {
             //Cant do anything about it!
             Log::info(__METHOD__, ['exception' => $e->getMessage()]);

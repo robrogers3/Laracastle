@@ -8,115 +8,118 @@ use robrogers3\Laracastle\Repositories\DeviceRepository;
 use robrogers3\Laracastle\Repositories\DeviceRepositoryInterface;
 use robrogers3\Laracastle\Tests\Device;
 use robrogers3\Laracastle\Tests\User;
-use robrogers3\Laracastle\Repositories\UserRepository;
 use robrogers3\Laracastle\Events\AccountCompromised;
 use robrogers3\Laracastle\Events\AccountNeedsReview;
 
 class RoutesTest extends TestCase
 {
-    protected $user;
+	protected $user;
 
-    protected $token;
+	protected $token;
 
-    /**
-     * Setup the test environment.
-     */
-    protected function setUp(): void
-    {
-        parent::setUp();
+	/**
+	 * Setup the test environment.
+	 */
+	protected function setUp(): void
+	{
+		parent::setUp();
+		$this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+		$this->token = "eyJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6ImpGM1RXMldGRUhqOGtaaWdjZ0E3ak1wczNydHM5ZVg1IiwidmVyc2lvbiI6MC4xfQ.u-9pAtDph_KoOvJqo7DaOm5izQ_ZXlrmiyFKRt7Wjrg";
+		$this->user = new User();
+		$this->user->name = 'Rob';
+		$this->user->email = 'robrogers@me.com';
+		$this->user->password = $passward = bcrypt('password');
+		$this->user->save();
+	}
 
-        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
-        $this->token = "eyJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6ImpGM1RXMldGRUhqOGtaaWdjZ0E3ak1wczNydHM5ZVg1IiwidmVyc2lvbiI6MC4xfQ.u-9pAtDph_KoOvJqo7DaOm5izQ_ZXlrmiyFKRt7Wjrg";
-        $this->user = new User();
-        $this->user->name = 'Rob';
-        $this->user->email = 'robrogers@me.com';
-        $this->user->password = $passward = bcrypt('password');
-        $this->user->save();
-    }
+	protected function getPackageProviders($app)
+	{
+		return ['robrogers3\Laracastle\LaracastleServiceProvider'];
+	}
 
-    protected function getPackageProviders($app)
-    {
-        return ['robrogers3\Laracastle\LaracastleServiceProvider'];
-    }
-
-    protected function XgetEnvironmentSetup($app)
-    {
-        include_once __DIR__ . '/../../database/migrations/2014_10_12_000000_create_users_table.php';
-        (new \CreateTestUsersTable)->up();
-    }
-
-
-    /** @test */
-    public function it_responds_to_the_compromised_webhooks_route()
-    {
-        $this->actingAs($this->user);
-        $this->withoutExceptionHandling();
-        $hookData = json_decode($this->getIncidentConfirmedWebhookJson(), true);
-        Event::fake();
-        $this->json('POST', route('laracastle.compromised-webhook'), $hookData)
-             ->assertOk()
-             ->assertSee('$incident.confirmed');
-        Event::assertDispatched(AccountCompromised::class, function ($e) {
-            return $e->user->id == $this->user->id;
-        });
-
-    }
+	protected function getEnvironmentSetup($app)
+	{
+		Route::get('/home', 'HomeController@index')
+			->middleware('verified')
+			->name('home');
+		return;
+		if (!class_exists(\CreateUsersTable::class)) {
+			include_once __DIR__ . '/../../database/migrations/2014_10_12_000000_create_users_table.php';
+			(new \CreateUsersTable)->up();
+		} else {
+		}
+	}
 
 
-    /** @test */
-    public function it_responds_to_the_review_webhooks_route()
-    {
-        $this->actingAs($this->user);
-        $this->withoutExceptionHandling();
-        Event::fake();
-        $hookData = json_decode($this->getReviewWebhookJson(), true);
-        $this->json('POST', route('laracastle.review-webhook'), $hookData)
-             ->assertOk()
-             ->assertSee('$review.opened');
+	/** @test */
+	public function it_responds_to_the_compromised_webhooks_route()
+	{
+		$this->actingAs($this->user);
+		$this->withoutExceptionHandling();
+		$hookData = json_decode($this->getIncidentConfirmedWebhookJson(), true);
+		Event::fake();
+		$this->json('POST', route('laracastle.compromised-webhook'), $hookData)
+			->assertOk()
+			->assertSee('$incident.confirmed');
+		Event::assertDispatched(AccountCompromised::class, function ($e) {
+			return $e->user->id == $this->user->id;
+		});
+	}
 
-        Event::assertDispatched(AccountNeedsReview::class, function ($e) {
-            return $e->user->id == $this->user->id;
-        });
 
-    }
+	/** @test */
+	public function it_responds_to_the_review_webhooks_route()
+	{
+		$this->actingAs($this->user);
+		$this->withoutExceptionHandling();
+		Event::fake();
+		$hookData = json_decode($this->getReviewWebhookJson(), true);
+		$this->json('POST', route('laracastle.review-webhook'), $hookData)
+			->assertOk()
+			->assertSee('$review.opened');
 
-    /** @test */
-    public function it_shows_a_users_device_given_a_device_token()
-    {
-        $this->withoutExceptionHandling();
+		Event::assertDispatched(AccountNeedsReview::class, function ($e) {
+			return $e->user->id == $this->user->id;
+		});
+	}
 
-        $this->actingAs($this->user)
-             ->get(route('laracastle.review-device', [1, $this->token]))
-             ->assertOk()
-             ->assertSee($this->token)
-             ->assertSee('San Francisco');
-    }
+	/** @test */
+	public function it_shows_a_users_device_given_a_device_token()
+	{
+		$this->withoutExceptionHandling();
 
-    /** @test */
-    public function it_reports_a_device()
-    {
-        $spy = $this->spy(Laracastle::class);
-        $this->withoutExceptionHandling();
-        $this->actingAs($this->user)
-             ->post(route('laracastle.report-device'), ['token' => $this->token])
-             ->assertRedirect('/home');
-        $spy->shouldHaveReceived('report')->once();
-    }
+		$this->actingAs($this->user)
+			->get(route('laracastle.review-device', [1, $this->token]))
+			->assertOk()
+			->assertSee($this->token)
+			->assertSee('San Francisco');
+	}
 
-    /** @test */
-    public function it_approves_a_device()
-    {
-        $spy = $this->spy(Laracastle::class);
-        $this->withoutExceptionHandling();
-        $this->actingAs($this->user)
-             ->delete(route('laracastle.approve-device'), ['token' => $this->token])
-             ->assertRedirect('/home');
-        $spy->shouldHaveReceived('approve')->once();
-    }
+	/** @test */
+	public function it_reports_a_device()
+	{
+		$spy = $this->spy(Laracastle::class);
+		$this->withoutExceptionHandling();
+		$this->actingAs($this->user)
+			->post(route('laracastle.report-device'), ['token' => $this->token])
+			->assertRedirect('/home');
+		$spy->shouldHaveReceived('report')->once();
+	}
 
-    protected function getDeviceData()
-    {
-        return '{
+	/** @test */
+	public function it_approves_a_device()
+	{
+		$spy = $this->spy(Laracastle::class);
+		$this->withoutExceptionHandling();
+		$this->actingAs($this->user)
+			->delete(route('laracastle.approve-device'), ['token' => $this->token])
+			->assertRedirect('/home');
+		$spy->shouldHaveReceived('approve')->once();
+	}
+
+	protected function getDeviceData()
+	{
+		return '{
 		"token": "19a0g9Hn84vkNSvRG6F9qM4j",
 		"object": "device",
 		"created_at": "2017-12-28T17:22:40.556Z",
@@ -149,10 +152,10 @@ class RoutesTest extends TestCase
 			}
 		}
 	}';
-    }
-    protected function getIncidentConfirmedWebhookJson()
-    {
-        return '{
+	}
+	protected function getIncidentConfirmedWebhookJson()
+	{
+		return '{
 		"api_version": "v1",
 		"app_id": "382395555537961",
 		"type": "$incident.confirmed",
@@ -190,11 +193,11 @@ class RoutesTest extends TestCase
 			}
 		}
 	}';
-    }
+	}
 
-    protected function getReviewWebhookJson()
-    {
-        return '{
+	protected function getReviewWebhookJson()
+	{
+		return '{
 		"api_version": "v1",
 		"app_id": "382395555537961",
 		"type": "$review.opened",
@@ -232,5 +235,5 @@ class RoutesTest extends TestCase
 			}
 		}
 	 }';
-    }
+	}
 }

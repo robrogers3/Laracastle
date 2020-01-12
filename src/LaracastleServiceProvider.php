@@ -5,7 +5,7 @@ namespace robrogers3\Laracastle;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use robrogers3\Laracastle\User;
+use Illuminate\Foundation\Auth\User;
 use robrogers3\Laracastle\UserInterface;
 use robrogers3\Laracastle\Console\Install;
 use robrogers3\Laracastle\Repositories\DeviceRepository;
@@ -24,13 +24,6 @@ class LaracastleServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'robrogers3');
-
-        $this->app->bind(DeviceRepositoryInterface::class, function ($app) {
-            return new DeviceRepository;
-        });
-        $this->app->bind(UserInterface::class, function ($app) {
-            return User::class;
-        });
 
         // Publishing is only necessary when using the CLI.
         if ($this->app->runningInConsole()) {
@@ -53,6 +46,7 @@ class LaracastleServiceProvider extends ServiceProvider
                 ->middleware('auth')
                 ->name('laracastle.approve-device');
         });
+
         Route::group(['middleware' => 'api'], function () {
             Route::post('laracastle/compromised-webhook',
                         '\robrogers3\Laracastle\Http\Controllers\WebHookController@compromised')
@@ -72,7 +66,6 @@ class LaracastleServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
         $this->mergeConfigFrom(__DIR__.'/../config/laracastle.php', 'laracastle');
 
         \Castle::setApiKey(config('laracastle.castle.secret'));
@@ -82,6 +75,14 @@ class LaracastleServiceProvider extends ServiceProvider
         // Register the service that Laracastle provides.
         $this->app->singleton('Laracastle', function ($app) {
             return new \robrogers3\Laracastle\Laracastle;
+        });
+
+        $this->app->bind(DeviceRepositoryInterface::class, function ($app) {
+            return new DeviceRepository;
+        });
+
+        $this->app->bind(UserInterface::class, function ($app) {
+            return User::class;
         });
     }
 

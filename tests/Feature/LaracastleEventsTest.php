@@ -5,19 +5,16 @@ namespace robrogers3\Laracastle\Tests\Feature;
 use Mockery;
 use robrogers3\Laracastle\Tests\User;
 use robrogers3\Laracastle\Laracastle;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Auth\Events\Verified;
 use robrogers3\Laracastle\Events\AccountNeedsReview;
 use robrogers3\Laracastle\Events\AccountCompromised;
-use robrogers3\Laracastle\Listeners\AccountCompromisedListener;
-use robrogers3\Laracastle\Listeners\AccountNeedsReviewListener;
 use robrogers3\Laracastle\Notifications\AccountReset;
 use robrogers3\Laracastle\Notifications\AccountReview;
 
@@ -25,14 +22,12 @@ use Orchestra\Testbench\TestCase;
 
 class LaracastleEventsTest extends TestCase
 {
-
-        /**
+    /**
      * Setup the test environment.
      */
     protected function setUp(): void
     {
         parent::setUp();
-
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
         $this->user = new User();
         $this->user->name = 'Rob';
@@ -47,6 +42,7 @@ class LaracastleEventsTest extends TestCase
     }
 
     //TODO delete these non-test methods
+    /** test */
     public function we_are_listening_for_login_events()
     {
         Event::fake();
@@ -64,7 +60,6 @@ class LaracastleEventsTest extends TestCase
         $_SERVER['HTTP_USER_AGENT'] = 'dude';
 
         Event::assertDispatched(Login::class, function ($e) use ($user) {
-            //$x = resolve('Laracastle')->authenticate($e);
             return $e->user->id === $user->id;
         });
     }
@@ -129,6 +124,7 @@ class LaracastleEventsTest extends TestCase
         Event::dispatch(new Logout('web', $user, false));
         $spy->shouldHaveReceived('trackLogout')->once();
     }
+
     /** @test */
     public function it_calls_track_on_password_reset()
     {
@@ -159,10 +155,15 @@ class LaracastleEventsTest extends TestCase
             [$user], AccountReview::class,
             function($notification, $channels) use ($token) {
                 return $notification->token == $token;
-
             }
         );
+    }
 
-
+    /** @test */
+    public function it_tracks_when_user_has_verified_email()
+    {
+        $spy = $this->spy(Laracastle::class);
+        Event::dispatch(new Verified('user'));
+        $spy->shouldHaveReceived('trackVerified')->once();
     }
 }

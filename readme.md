@@ -30,7 +30,7 @@ $ composer require robrogers3/laracastle
 
 ### Requirements
 
-Laracastle pretty much depends on the [Laravel Auth](https://laravel.com/docs/6.x/authentication) package. On Laravel 6, Auth is a separate package. So first install it.
+Laracastle pretty much depends on the [Laravel Auth](https://laravel.com/docs/6.x/authentication) package. On Laravel 6, Auth is a separate package. So first install it. Without the Auth package you will have A LOT of work to do.
 
 ```
 composer require laravel/ui --dev
@@ -51,6 +51,7 @@ And, then of course run this:
 php artisan migrate
 ```
 
+*Also if you plan to use Email Verification to protect important routes, which is recommended, you will need to configure the mail driver.*
 
 ### Initial Configuration
 
@@ -69,11 +70,13 @@ Then, update update your .env files, like so:
 CASTLE_SECRET=YOUR_CASTLE_SECRET
 CASTLE_APP_ID=YOUR_CASTLE_APP_ID
 CASTLE_MODE=[evaluation|production]
+
+HOME_ROUTE='/home'
 ```
 
 *When you are just starting out, set the CASTLE_MODE to 'evaluation'. Once you are ready to take action, change the CASTLE_MODE to 'production.'*
 
-
+*Also, castle requires a HOME_ROUTE, which defaults to 'home', you can change this if your 'home' route changes.*
 ### Run the Automatic Install
 
 To have Castle.io integrated in minutes just run this command:
@@ -105,7 +108,7 @@ Next update your Auth routes in routes/web.php like so:
 ```
 Auth::routes(['verify' => true]);
 ```
-Then **make sure** you user implements 'MustVerifyEmail' and 'Laracastle\UserInterface'.
+Then **make sure** your user implements 'MustVerifyEmail' and 'Laracastle\UserInterface'.
 
 You will also need to add these two traits to your user model:
 * ResetsAccounts, and
@@ -128,16 +131,16 @@ class User extends Authenticatable implements MustVerifyEmail, UserInterface
 ```
 
 Lastly, protected routes that should be verified by email. Like so:
-
 ```
 Route::get('home', function () {
     // Only verified users may enter...
 })->middleware('verified'); // verified middleware is the key!
 ```
 
-Optional: Add this to your AppServiceProvider
+Optional but Recommended: Add this to your AppServiceProvider
 ```
 //...
+use App\User;
 use robrogers3\Laracastle\UserInterface;
 //...
 
@@ -180,7 +183,7 @@ You can find it in:
 ./resources/views/vendor/robrogers3/pages/device.blade.php
 ```
 
-Congrats you’re done. Your users are now protected by [castle.io](https://castle.io).
+Congrats **you’re done**. Your users are now protected by [castle.io](https://castle.io).
 
 ## How It (Laracastle) Works?
 
@@ -192,7 +195,7 @@ When the Login Event is fired, Laracastle makes a realtime request to [castle.io
 
 If the Login is allowed, then Laracastle proceeds as per usual.
 
-If the Login is challenged, then we either ask the user to confirm their email address, or request that they login again. (See [config](#Configuration) )
+If the Login is challenged, then we either ask the user to verify their email address, or request that they login again. (See [config](#Configuration) )
 
 If the Login is denied, then we disallow Login, and then Laravel will take over to lock the account for a specified duration. [Learn more about throttling requests](https://laravel.com/docs/6.x/authentication#login-throttling) on Laravel.com.
 
@@ -203,7 +206,6 @@ If the Login is denied, then we disallow Login, and then Laravel will take over 
 If Castle.io determines that an account may have been compromised, it sends a request to a webhook in Laracastle. Laracastle uses this information to reset the user's account password, and then notify them via email that their account may have been compromised and that they need to reset their password before they can access protected resources.
 
 <img src="account-reset-notification.png" alt="account reset notification" width="400px"/>
-
 
 #### When unusual or suspicious devices access your account.
 

@@ -10,6 +10,8 @@ use robrogers3\Laracastle\Repositories\DeviceRepositoryInterface;
 
 class DevicesController extends Controller
 {
+    protected $deviceRepository;
+
     public function __construct(DeviceRepositoryInterface $deviceRepository)
     {
         $this->deviceRepository = $deviceRepository;
@@ -39,12 +41,12 @@ class DevicesController extends Controller
             'token' => 'required'
         ]);
 
-        //Event it??
+        //Event it to allow queuing??
         Laracastle::report($validatedData['token']);
 
         session()->flash('status', 'Device Reported');
 
-        return redirect('/home');
+        return redirect(route(config('laracastle.options.home_route_name')));
     }
 
     /**
@@ -56,11 +58,11 @@ class DevicesController extends Controller
             'token' => 'required'
         ]);
 
-        //Event it??
+        //Event it to allow queuing??
         Laracastle::approve($validatedData['token']);
 
         session()->flash('status', 'Device Approved');
-
-        return redirect('/home');
+        return redirect('home');
+        return redirect(route(config('laracastle.options.home_route_name')));
     }
 }

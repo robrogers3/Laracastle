@@ -155,6 +155,20 @@ class LaracastleTest extends TestCase
             "device_token" => 'some-token'
         ], $tracked);
     }
+
+    /** @test */
+    public function it_does_nothing_on_track_verified()
+    {
+        $user = new User(1,'robrogers@example.com', '2020-01-01', null);
+        $event = new TesterEvent($user, 'web');
+        $castler = new TesterCastler(null);
+        $laracastle = new Laracastle($castler);
+        $tracked = $laracastle->trackVerified($event);
+        $this->assertSame([
+            "event" => '$challenge.succeeded',
+            "user_id" => 1
+        ], $tracked);
+    }
 }
 
 /**

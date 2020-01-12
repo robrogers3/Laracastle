@@ -8,7 +8,7 @@ trait ChecksVerification
 {
     public function recentlyVerified()
     {
-        if (!$this->email_verified_at) {
+        if (is_null($this->email_verified_at)) {
             return false;
         }
 

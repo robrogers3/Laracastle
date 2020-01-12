@@ -5,6 +5,9 @@ namespace robrogers3\Laracastle\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
+/**
+ * @codeCoverageIgnore
+ */
 class Install extends Command
 {
     /**
