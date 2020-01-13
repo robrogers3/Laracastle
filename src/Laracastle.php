@@ -26,7 +26,6 @@ class Laracastle
         } else {
             $this->castler = \Castle::class;
         }
-
     }
 
     /**
@@ -93,7 +92,8 @@ class Laracastle
             }
 
             // instead of showing a challenge make them ReVerifyEmail
-            // should be configurable
+            // unless they have recently verified the email,
+            // this is configurable; default is 5 min.
             if ($event->user->recentlyVerified()) {
                 Log::debug(__METHOD__, ['message' => 'they just verified so pass.', 'user' => $event->user]);
                 return;

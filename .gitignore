@@ -8,3 +8,5 @@ yarn-error.log
 *~
 .phpunit.result.cache
 .DS_Store
+.projectile
+composer.lock
