@@ -10,8 +10,4 @@ before_script:
   - composer dump-autoload
 
 
-cache:
-  directories:
-    - vendor
-
 script: phpunit
